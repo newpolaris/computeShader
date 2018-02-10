@@ -46,9 +46,6 @@
 
 namespace
 {
-	struct fRGB {
-		float r, g, b; 
-	};
     const unsigned int WINDOW_WIDTH = 1280;
     const unsigned int WINDOW_HEIGHT = 720;
 	const char* WINDOW_NAME = "Basic Example";
@@ -62,6 +59,9 @@ namespace
 
     GLuint m_EmptyVAO = 0;
     bool bWireframe = false;
+    FullscreenTriangleMesh m_FullscreenTriangle;
+    BaseTexture m_SourceImage, m_DestinationImage;
+    ProgramShader m_programScreenQuad;
 
     //?
 
@@ -325,6 +325,9 @@ namespace {
 
 	void finalizeApp()
 	{
+        m_FullscreenTriangle.destroy();
+        m_programScreenQuad.destroy();
+
         glswShutdown();  
         Logger::getInstance().close();
 		ImGui_ImplGlfwGL3_Shutdown();
@@ -364,7 +367,6 @@ namespace {
 	{
         Timer::getInstance().update();
         camera.update();
-        // app.update();
 		updateHUD();
 	}
 
@@ -375,6 +377,17 @@ namespace {
 
 	void prepareRender()
 	{
+        m_FullscreenTriangle.init();
+
+        m_programScreenQuad.initalize();
+        m_programScreenQuad.addShader(GL_VERTEX_SHADER, "ScreenQuad.Vertex");
+        m_programScreenQuad.addShader(GL_FRAGMENT_SHADER, "ScreenQuad.Fragment");
+        m_programScreenQuad.link();
+
+        m_SourceImage.create("resource/girl.png");
+        m_DestinationImage.create(
+            WINDOW_WIDTH, WINDOW_HEIGHT,
+            GL_TEXTURE_2D, GL_RGB8, 1);
 	}
 
     void render()
@@ -386,6 +399,12 @@ namespace {
         glClearColor(0, 0, 0, 0);
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );    
         glPolygonMode(GL_FRONT_AND_BACK, (bWireframe)? GL_LINE : GL_FILL);
+
+        m_SourceImage.bind(0);
+        m_programScreenQuad.bind();
+        m_programScreenQuad.setUniform("uTexSource", 0);
+        m_FullscreenTriangle.draw();
+
 		renderHUD();
     }
 
