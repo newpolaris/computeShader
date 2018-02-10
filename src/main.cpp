@@ -38,7 +38,6 @@
 #include <GLType/BaseTexture.h>
 #include <SkyBox.h>
 #include <Mesh.h>
-#include <ModelAssImp.h>
 
 #include <fstream>
 #include <memory>
@@ -108,7 +107,7 @@ void APIENTRY OpenglCallbackFunction(GLenum source,
     using namespace std;
 
     // ignore these non-significant error codes
-    if (id == 131169 || id == 131185 || id == 131218 || id == 131204) 
+    if (id == 131169 || id == 131185 || id == 131218 || id == 131204 || id == 131184) 
         return;
 
     cout << "---------------------opengl-callback-start------------" << endl;
@@ -468,7 +467,7 @@ namespace {
 			glfwGetCursorPos(window, &xpos, &ypos);
 			const bool mouseOverGui = ImGui::MouseOverArea();
 			if (!mouseOverGui)
-				camera.motionHandler( xpos, ypos, true); 
+				camera.motionHandler( int(xpos), int(ypos), true); 
 		}    
     }
 

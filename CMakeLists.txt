@@ -1,8 +1,8 @@
 # CMake entry point
 cmake_minimum_required (VERSION 3.0)
-project (lightProbe)
+project (computeShader)
 
-set(APP_TARGET lightProbe.app)
+set(APP_TARGET computeShader.app)
 
 #if( APPLE )
     set(CMAKE_CXX_STANDARD 14)
@@ -11,7 +11,7 @@ set(APP_TARGET lightProbe.app)
 
 find_package(OpenGL REQUIRED)
 
-set(UseAssImp TRUE)
+set(UseAssImp FALSE)
 set(UseGLI TRUE)
 
 # Compile external dependencies 
@@ -45,9 +45,7 @@ set(ALL_LIBS
 	${OPENGL_LIBRARY}
 	glfw
 	GLEW_1130
-	FreeImage
 	imgui
-	assimp
 	gli
 )
 
