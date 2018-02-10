@@ -250,17 +250,18 @@ bool BaseTexture::createFromFileSTB(const std::string& filename)
 
 	GLenum Target = GL_TEXTURE_2D;
     GLenum Type = GL_UNSIGNED_BYTE;
-    int Width = 0, Height = 0, nrComponents = 0;
+    const bool bForce4Component = true;
+	int Width = 0, Height = 0, nrComponents = 0;
     void* Data = nullptr;
     std::string Ext = GetFileExtension(filename);
     if (Stricompare(Ext, "HDR"))
     {
         Type = GL_FLOAT;
-        Data = stbi_loadf(filename.c_str(), &Width, &Height, &nrComponents, 0);
+        Data = stbi_loadf(filename.c_str(), &Width, &Height, &nrComponents, bForce4Component);
     }
     else
     {
-        Data = stbi_load(filename.c_str(), &Width, &Height, &nrComponents, 0);
+        Data = stbi_load(filename.c_str(), &Width, &Height, &nrComponents, bForce4Component);
     }
     if (!Data) return false;
 

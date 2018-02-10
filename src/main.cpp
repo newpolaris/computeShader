@@ -390,14 +390,14 @@ namespace {
         m_programCompute.link();
 
         m_SourceImage.create("resource/girl.png");
-        m_DestinationImage.create(
-            WINDOW_WIDTH, WINDOW_HEIGHT,
+        m_DestinationImage.create(WINDOW_WIDTH, WINDOW_HEIGHT,
             GL_TEXTURE_2D, GL_RGBA8, 1);
 
         m_programCompute.bind();
         // Bind input image 
+        glBindImageTexture(0, m_SourceImage.m_TextureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8); 
         // Bind output image 
-        glBindImageTexture(0, m_DestinationImage.m_TextureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8); 
+        glBindImageTexture(1, m_DestinationImage.m_TextureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8); 
         // Dispatch the compute shader 
         glDispatchCompute((WINDOW_WIDTH-1)/32+1, (WINDOW_HEIGHT-1)/32+1, 1);
 	}
