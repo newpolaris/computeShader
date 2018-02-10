@@ -46,7 +46,7 @@
 
 namespace
 {
-    const unsigned int WINDOW_WIDTH = 1280;
+    const unsigned int WINDOW_WIDTH = 1024;
     const unsigned int WINDOW_HEIGHT = 720;
 	const char* WINDOW_NAME = "Basic Example";
 
@@ -61,7 +61,7 @@ namespace
     bool bWireframe = false;
     FullscreenTriangleMesh m_FullscreenTriangle;
     BaseTexture m_SourceImage, m_DestinationImage;
-    ProgramShader m_programScreenQuad;
+    ProgramShader m_programScreenQuad, m_programCompute;
 
     //?
 
@@ -212,7 +212,7 @@ namespace {
 		// GLSW : shader file manager
 		glswInit();
 		glswSetPath("./shaders/", ".glsl");
-		glswAddDirectiveToken("*", "#version 330 core");
+		glswAddDirectiveToken("*", "#version 450 core");
 
         // App Objects
         camera.setViewParams( glm::vec3( 5.0f, 5.0f, 20.0f), glm::vec3( 5.0f, 5.0f, 0.0f) );
@@ -301,7 +301,7 @@ namespace {
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     #endif
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		
@@ -327,6 +327,7 @@ namespace {
 	{
         m_FullscreenTriangle.destroy();
         m_programScreenQuad.destroy();
+        m_programCompute.destroy();
 
         glswShutdown();  
         Logger::getInstance().close();
@@ -384,10 +385,21 @@ namespace {
         m_programScreenQuad.addShader(GL_FRAGMENT_SHADER, "ScreenQuad.Fragment");
         m_programScreenQuad.link();
 
+        m_programCompute.initalize();
+        m_programCompute.addShader(GL_COMPUTE_SHADER, "BlitCompute.Compute");
+        m_programCompute.link();
+
         m_SourceImage.create("resource/girl.png");
         m_DestinationImage.create(
             WINDOW_WIDTH, WINDOW_HEIGHT,
-            GL_TEXTURE_2D, GL_RGB8, 1);
+            GL_TEXTURE_2D, GL_RGBA8, 1);
+
+        m_programCompute.bind();
+        // Bind input image 
+        // Bind output image 
+        glBindImageTexture(0, m_DestinationImage.m_TextureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8); 
+        // Dispatch the compute shader 
+        glDispatchCompute((WINDOW_WIDTH-1)/32+1, (WINDOW_HEIGHT-1)/32+1, 1);
 	}
 
     void render()
@@ -395,12 +407,13 @@ namespace {
         // Rendering
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
+
         glViewport(0, 0, display_w, display_h);
         glClearColor(0, 0, 0, 0);
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );    
         glPolygonMode(GL_FRONT_AND_BACK, (bWireframe)? GL_LINE : GL_FILL);
 
-        m_SourceImage.bind(0);
+        m_DestinationImage.bind(0);
         m_programScreenQuad.bind();
         m_programScreenQuad.setUniform("uTexSource", 0);
         m_FullscreenTriangle.draw();
